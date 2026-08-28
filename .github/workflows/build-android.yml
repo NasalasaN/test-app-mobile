@@ -18,10 +18,12 @@ jobs:
 
       - uses: android-actions/setup-android@v3
 
-      - name: Install required Android SDK components
-        run: |
-          yes | sdkmanager --licenses || true
-          sdkmanager "platforms;android-37" "build-tools;36.0.0"
+      - name: Accept Android SDK licenses
+        # Le projet compile contre le SDK 37 (requis par permission_handler_android).
+        # On n'installe pas la plateforme manuellement ici : Gradle/AGP la
+        # télécharge automatiquement pendant `flutter build`, une fois les
+        # licences acceptées.
+        run: yes | sdkmanager --licenses || true
 
       - uses: subosito/flutter-action@v2
         with:
