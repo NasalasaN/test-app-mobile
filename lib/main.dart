@@ -7,7 +7,7 @@ import 'providers/location_provider.dart';
 import 'providers/prayer_times_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/weather_provider.dart';
-import 'screens/home_screen.dart';
+import 'screens/root_screen.dart';
 import 'services/api/geocoding_api.dart';
 import 'services/api/prayer_times_api.dart';
 import 'services/api/weather_api.dart';
@@ -50,6 +50,7 @@ class MiqatApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
+        Provider<StorageService>.value(value: storage),
         ChangeNotifierProvider<LocationProvider>(
           create: (_) => LocationProvider(
             locationService: locationService,
@@ -93,7 +94,7 @@ class MiqatApp extends StatelessWidget {
         title: 'Miqat',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.dark,
-        home: const HomeScreen(),
+        home: const RootScreen(),
       ),
     );
   }

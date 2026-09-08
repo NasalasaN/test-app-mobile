@@ -62,4 +62,22 @@ class StorageService {
       jsonEncode(settings.toJson()),
     );
   }
+
+  // Cache local du Coran (pour une lecture hors-ligne après le premier
+  // chargement de chaque sourate).
+  static const _keyQuranSurahList = 'quran_surah_list';
+  static String _keyQuranSurahDetail(int number) => 'quran_surah_$number';
+
+  String? readCachedSurahListJson() => _prefs.getString(_keyQuranSurahList);
+
+  Future<void> writeCachedSurahListJson(String json) {
+    return _prefs.setString(_keyQuranSurahList, json);
+  }
+
+  String? readCachedSurahDetailJson(int number) =>
+      _prefs.getString(_keyQuranSurahDetail(number));
+
+  Future<void> writeCachedSurahDetailJson(int number, String json) {
+    return _prefs.setString(_keyQuranSurahDetail(number), json);
+  }
 }
