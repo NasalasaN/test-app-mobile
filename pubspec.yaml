@@ -45,6 +45,7 @@ dependencies:
   intl: ^0.20.3
   provider: ^6.1.5+1
   workmanager: ^0.10.9
+  flutter_device_compass: ^2.2.0
 
 dev_dependencies:
   flutter_test:

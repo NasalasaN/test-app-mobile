@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'home_screen.dart';
+import 'qibla_screen.dart';
 import 'quran_surah_list_screen.dart';
 
 /// Écran racine : barre d'onglets en bas entre les horaires de prière et
@@ -15,7 +16,7 @@ class RootScreen extends StatefulWidget {
 class _RootScreenState extends State<RootScreen> {
   int _index = 0;
 
-  static const _screens = [HomeScreen(), QuranSurahListScreen()];
+  static const _screens = [HomeScreen(), QiblaScreen(), QuranSurahListScreen()];
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +27,7 @@ class _RootScreenState extends State<RootScreen> {
         onDestinationSelected: (index) => setState(() => _index = index),
         destinations: const [
           NavigationDestination(icon: Icon(Icons.access_time), label: 'Horaires'),
+          NavigationDestination(icon: Icon(Icons.explore), label: 'Qibla'),
           NavigationDestination(icon: Icon(Icons.menu_book), label: 'Coran'),
         ],
       ),
