@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatf
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/ambiance_model.dart';
 import '../models/calculation_method_model.dart';
 import '../models/prayer_times_model.dart';
 import '../providers/prayer_times_provider.dart';
@@ -125,6 +126,29 @@ class SettingsScreen extends StatelessWidget {
               },
             ),
           ],
+          const Divider(height: 32),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(
+              'Ambiance',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          RadioGroup<BackgroundAmbiance>(
+            groupValue: settings.ambiance,
+            onChanged: (value) {
+              if (value != null) settings.setAmbiance(value);
+            },
+            child: Column(
+              children: [
+                for (final ambiance in BackgroundAmbiance.values)
+                  RadioListTile<BackgroundAmbiance>(
+                    title: Text(ambiance.labelFr),
+                    value: ambiance,
+                  ),
+              ],
+            ),
+          ),
         ],
       ),
     );

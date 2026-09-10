@@ -29,7 +29,11 @@ class _QuranSurahListScreenState extends State<QuranSurahListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Le Coran')),
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        title: const Text('Le Coran'),
+      ),
       body: FutureBuilder<List<SurahMeta>>(
         future: _future,
         builder: (context, snapshot) {

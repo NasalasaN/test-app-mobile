@@ -19,7 +19,11 @@ class QiblaScreen extends StatelessWidget {
     final location = locationProvider.location;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Qibla')),
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        title: const Text('Qibla'),
+      ),
       body: location == null
           ? Center(
               child: Padding(

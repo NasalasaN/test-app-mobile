@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../models/ambiance_model.dart';
 import '../../models/calculation_method_model.dart';
 import '../../models/location_model.dart';
 import '../../models/notification_settings_model.dart';
@@ -79,5 +80,20 @@ class StorageService {
 
   Future<void> writeCachedSurahDetailJson(int number, String json) {
     return _prefs.setString(_keyQuranSurahDetail(number), json);
+  }
+
+  // Ambiance visuelle de fond.
+  static const _keyAmbiance = 'background_ambiance';
+
+  BackgroundAmbiance readAmbiance() {
+    final raw = _prefs.getString(_keyAmbiance);
+    return BackgroundAmbiance.values.firstWhere(
+      (a) => a.name == raw,
+      orElse: () => BackgroundAmbiance.auto,
+    );
+  }
+
+  Future<void> writeAmbiance(BackgroundAmbiance ambiance) {
+    return _prefs.setString(_keyAmbiance, ambiance.name);
   }
 }

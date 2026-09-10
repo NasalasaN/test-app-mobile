@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../models/ambiance_model.dart';
 import '../models/notification_settings_model.dart';
 import '../models/prayer_times_model.dart';
 import '../services/storage/storage_service.dart';
@@ -14,11 +15,19 @@ class SettingsProvider extends ChangeNotifier {
 
   int calculationMethodId = 21;
   NotificationSettings notificationSettings = NotificationSettings.defaults();
+  BackgroundAmbiance ambiance = BackgroundAmbiance.auto;
 
   Future<void> load() async {
     calculationMethodId = _storage.readCalculationMethodId();
     notificationSettings = _storage.readNotificationSettings();
+    ambiance = _storage.readAmbiance();
     notifyListeners();
+  }
+
+  Future<void> setAmbiance(BackgroundAmbiance value) async {
+    ambiance = value;
+    notifyListeners();
+    await _storage.writeAmbiance(value);
   }
 
   Future<void> setCalculationMethodId(int id) async {
