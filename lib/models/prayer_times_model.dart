@@ -53,4 +53,28 @@ class PrayerTimes {
         MapEntry(PrayerName.maghrib, maghrib),
         MapEntry(PrayerName.isha, isha),
       ];
+
+  Map<String, dynamic> toJson() => {
+        'date': date.toIso8601String(),
+        'fajr': fajr.toIso8601String(),
+        'sunrise': sunrise.toIso8601String(),
+        'dhuhr': dhuhr.toIso8601String(),
+        'asr': asr.toIso8601String(),
+        'maghrib': maghrib.toIso8601String(),
+        'isha': isha.toIso8601String(),
+        'hijriDateLabel': hijriDateLabel,
+        'calculationMethodId': calculationMethodId,
+      };
+
+  factory PrayerTimes.fromJson(Map<String, dynamic> json) => PrayerTimes(
+        date: DateTime.parse(json['date'] as String),
+        fajr: DateTime.parse(json['fajr'] as String),
+        sunrise: DateTime.parse(json['sunrise'] as String),
+        dhuhr: DateTime.parse(json['dhuhr'] as String),
+        asr: DateTime.parse(json['asr'] as String),
+        maghrib: DateTime.parse(json['maghrib'] as String),
+        isha: DateTime.parse(json['isha'] as String),
+        hijriDateLabel: json['hijriDateLabel'] as String,
+        calculationMethodId: json['calculationMethodId'] as int,
+      );
 }

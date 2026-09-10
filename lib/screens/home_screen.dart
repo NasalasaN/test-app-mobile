@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
+import '../models/prayer_times_model.dart';
 import '../providers/load_status.dart';
 import '../providers/location_provider.dart';
 import '../providers/prayer_times_provider.dart';
@@ -78,6 +80,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         title: const Text('Miqat'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.share),
+            tooltip: 'Partager les horaires',
+            onPressed: prayerTimes.today == null
+                ? null
+                : () => _shareTodaysTimes(context, prayerTimes.today!),
+          ),
+          IconButton(
             icon: const Icon(Icons.calendar_month),
             tooltip: 'Prochains jours',
             onPressed: () => Navigator.of(context).push(
@@ -116,6 +125,28 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
       ),
     );
+  }
+
+  void _shareTodaysTimes(BuildContext context, PrayerTimes times) {
+    final location = context.read<LocationProvider>().location;
+    final cityLabel = location != null
+        ? [location.cityName, location.country]
+            .whereType<String>()
+            .where((e) => e.isNotEmpty)
+            .join(', ')
+        : null;
+
+    final buffer = StringBuffer()
+      ..writeln('Horaires de prière${cityLabel != null ? ' — $cityLabel' : ''}')
+      ..writeln(formatDateLongFr(DateTime.now()))
+      ..writeln(times.hijriDateLabel)
+      ..writeln();
+    for (final entry in times.orderedEntries) {
+      buffer.writeln('${entry.key.labelFr} : ${formatTimeFr(entry.value)}');
+    }
+    buffer.writeln('\nvia l\'app Miqat');
+
+    SharePlus.instance.share(ShareParams(text: buffer.toString()));
   }
 
   Widget _buildPrayerSection(

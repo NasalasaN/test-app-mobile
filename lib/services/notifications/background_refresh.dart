@@ -27,12 +27,14 @@ void backgroundRefreshDispatcher() {
       await NotificationService.instance.init();
       final useExactAlarms = await NotificationService.instance.canUseExactAlarms();
 
+      final now = DateTime.now();
       final times = await PrayerTimesApi().fetchTimings(
         latitude: location.latitude,
         longitude: location.longitude,
-        forDate: DateTime.now(),
+        forDate: now,
         calculationMethodId: methodId,
       );
+      await storage.writeCachedPrayerTimes(now, times);
 
       await NotificationService.instance.rescheduleAll(
         today: times,

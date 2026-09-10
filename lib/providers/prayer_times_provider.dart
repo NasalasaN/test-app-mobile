@@ -1,3 +1,4 @@
+// ignore_for_file: prefer_initializing_formals, keeps public param names for callers.
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -7,17 +8,24 @@ import '../models/notification_settings_model.dart';
 import '../models/prayer_times_model.dart';
 import '../services/api/prayer_times_api.dart';
 import '../services/notifications/notification_service.dart';
+import '../services/storage/storage_service.dart';
 import '../utils/prayer_time_utils.dart';
 import 'load_status.dart';
+
+/// Nombre de jours pré-chargés en cache à l'avance, pour que l'app reste
+/// utilisable hors-ligne plusieurs jours en cas de coupure réseau.
+const _prefetchDays = 6;
 
 /// État des horaires de prière du jour : chargement, compte à rebours vers
 /// la prochaine prière, rafraîchissement automatique à minuit, et
 /// reprogrammation des notifications.
 class PrayerTimesProvider extends ChangeNotifier {
-  // ignore: prefer_initializing_formals, keeps a public param name for callers.
-  PrayerTimesProvider({required PrayerTimesApi api}) : _api = api;
+  PrayerTimesProvider({required PrayerTimesApi api, required StorageService storage})
+      : _api = api,
+        _storage = storage;
 
   final PrayerTimesApi _api;
+  final StorageService _storage;
 
   LoadStatus status = LoadStatus.initial;
   PrayerTimes? today;
@@ -82,6 +90,7 @@ class PrayerTimesProvider extends ChangeNotifier {
       today = times;
       status = LoadStatus.loaded;
       errorMessageFr = null;
+      await _storage.writeCachedPrayerTimes(forDate, times);
       _updateNextPrayer();
       _startCountdownTicker();
       _scheduleMidnightRefresh(notificationSettings);
@@ -92,16 +101,52 @@ class PrayerTimesProvider extends ChangeNotifier {
         settings: notificationSettings,
         useExactAlarms: _useExactAlarms,
       );
+
+      unawaited(_prefetchUpcomingDays());
     } on PrayerTimesApiException catch (e) {
-      status = LoadStatus.error;
-      errorMessageFr = e.messageFr;
-      // On garde volontairement les anciens horaires (`today`) affichés
-      // s'ils existent, plutôt que de vider l'écran.
+      final cached = _storage.readCachedPrayerTimes(forDate);
+      if (cached != null) {
+        today = cached;
+        status = LoadStatus.loaded;
+        errorMessageFr = null;
+        _updateNextPrayer();
+        _startCountdownTicker();
+        _scheduleMidnightRefresh(notificationSettings);
+      } else {
+        status = LoadStatus.error;
+        errorMessageFr = e.messageFr;
+        // On garde volontairement les anciens horaires (`today`) affichés
+        // s'ils existent, plutôt que de vider l'écran.
+      }
     } catch (_) {
       status = LoadStatus.error;
       errorMessageFr = 'Erreur inattendue lors du chargement des horaires.';
     }
     notifyListeners();
+  }
+
+  /// Précharge silencieusement les [_prefetchDays] jours suivants dans le
+  /// cache local, en tâche de fond (échecs ignorés — c'est un confort, pas
+  /// une opération critique). Permet à l'app de rester utilisable même
+  /// après plusieurs jours sans connexion.
+  Future<void> _prefetchUpcomingDays() async {
+    if (_lastLocation == null || _lastMethodId == null) return;
+    for (var i = 1; i <= _prefetchDays; i++) {
+      final date = DateTime.now().add(Duration(days: i));
+      if (_storage.readCachedPrayerTimes(date) != null) continue;
+      try {
+        final times = await _api.fetchTimings(
+          latitude: _lastLocation!.latitude,
+          longitude: _lastLocation!.longitude,
+          forDate: date,
+          calculationMethodId: _lastMethodId!,
+        );
+        await _storage.writeCachedPrayerTimes(date, times);
+      } catch (_) {
+        // Best-effort : on retentera au prochain lancement avec réseau.
+        return;
+      }
+    }
   }
 
   Future<void> _ensureExactAlarmsChecked() async {

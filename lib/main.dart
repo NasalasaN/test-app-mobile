@@ -7,6 +7,7 @@ import 'providers/location_provider.dart';
 import 'providers/prayer_times_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/weather_provider.dart';
+import 'screens/onboarding_screen.dart';
 import 'screens/root_screen.dart';
 import 'services/api/geocoding_api.dart';
 import 'services/api/prayer_times_api.dart';
@@ -47,26 +48,33 @@ class MiqatApp extends StatelessWidget {
     final prayerTimesApi = PrayerTimesApi();
     final weatherApi = WeatherApi();
     final locationService = LocationService();
+    final hasSeenOnboarding = storage.readHasSeenOnboarding();
 
     return MultiProvider(
       providers: [
         Provider<StorageService>.value(value: storage),
         ChangeNotifierProvider<LocationProvider>(
-          create: (_) => LocationProvider(
-            locationService: locationService,
-            geocodingApi: geocodingApi,
-            storage: storage,
-          )..init(),
+          create: (_) {
+            final provider = LocationProvider(
+              locationService: locationService,
+              geocodingApi: geocodingApi,
+              storage: storage,
+            );
+            // Au tout premier lancement, on laisse l'écran d'accueil
+            // expliquer pourquoi avant de déclencher la demande système.
+            if (hasSeenOnboarding) provider.init();
+            return provider;
+          },
         ),
         ChangeNotifierProvider<SettingsProvider>(
           create: (_) => SettingsProvider(storage: storage)..load(),
         ),
         ChangeNotifierProxyProvider2<LocationProvider, SettingsProvider,
             PrayerTimesProvider>(
-          create: (_) => PrayerTimesProvider(api: prayerTimesApi),
+          create: (_) => PrayerTimesProvider(api: prayerTimesApi, storage: storage),
           update: (_, locationProvider, settingsProvider, provider) {
-            final prayerTimesProvider =
-                provider ?? PrayerTimesProvider(api: prayerTimesApi);
+            final prayerTimesProvider = provider ??
+                PrayerTimesProvider(api: prayerTimesApi, storage: storage);
             final location = locationProvider.location;
             if (location != null) {
               prayerTimesProvider.syncWith(
@@ -94,7 +102,7 @@ class MiqatApp extends StatelessWidget {
         title: 'Miqat',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.dark,
-        home: const RootScreen(),
+        home: hasSeenOnboarding ? const RootScreen() : const OnboardingScreen(),
       ),
     );
   }

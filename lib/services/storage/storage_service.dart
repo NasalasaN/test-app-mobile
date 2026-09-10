@@ -6,6 +6,7 @@ import '../../models/ambiance_model.dart';
 import '../../models/calculation_method_model.dart';
 import '../../models/location_model.dart';
 import '../../models/notification_settings_model.dart';
+import '../../models/prayer_times_model.dart';
 
 /// Persistance locale (localisation, méthode de calcul, préférences de
 /// notification) via shared_preferences.
@@ -95,5 +96,39 @@ class StorageService {
 
   Future<void> writeAmbiance(BackgroundAmbiance ambiance) {
     return _prefs.setString(_keyAmbiance, ambiance.name);
+  }
+
+  // Cache local des horaires de prière, par date — permet à l'app de rester
+  // utilisable plusieurs jours hors-ligne (les horaires ne changent pas
+  // d'un jour à l'autre pour un même lieu/méthode).
+  static String _keyPrayerTimesForDate(DateTime date) =>
+      'prayer_times_${date.year.toString().padLeft(4, '0')}-'
+      '${date.month.toString().padLeft(2, '0')}-'
+      '${date.day.toString().padLeft(2, '0')}';
+
+  PrayerTimes? readCachedPrayerTimes(DateTime date) {
+    final raw = _prefs.getString(_keyPrayerTimesForDate(date));
+    if (raw == null) return null;
+    try {
+      return PrayerTimes.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> writeCachedPrayerTimes(DateTime date, PrayerTimes times) {
+    return _prefs.setString(
+      _keyPrayerTimesForDate(date),
+      jsonEncode(times.toJson()),
+    );
+  }
+
+  // Premier lancement : a-t-on déjà montré l'écran d'accueil explicatif ?
+  static const _keyHasSeenOnboarding = 'has_seen_onboarding';
+
+  bool readHasSeenOnboarding() => _prefs.getBool(_keyHasSeenOnboarding) ?? false;
+
+  Future<void> writeHasSeenOnboarding() {
+    return _prefs.setBool(_keyHasSeenOnboarding, true);
   }
 }
