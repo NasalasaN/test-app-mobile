@@ -68,7 +68,11 @@ out center tags;
     http.Response response;
     try {
       response = await _client
-          .post(Uri.parse(_endpoint), body: {'data': overpassQl})
+          .post(
+            Uri.parse(_endpoint),
+            headers: const {'User-Agent': 'Miqat/1.0 (com.miqat.miqat)'},
+            body: {'data': overpassQl},
+          )
           .timeout(const Duration(seconds: 25));
     } catch (_) {
       throw const PoiApiException(
