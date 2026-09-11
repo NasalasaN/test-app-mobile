@@ -42,6 +42,10 @@ class _MapScreenState extends State<MapScreen> {
   // Filtre par nom parmi les lieux déjà chargés.
   String _poiFilterQuery = '';
 
+  // Affichage ou non du panneau recherche/filtres, pour laisser plus de
+  // place à la carte une fois les réglages faits.
+  bool _panelOpen = true;
+
   final Set<PoiCategory> _visibleCategories = {
     PoiCategory.mosque,
     PoiCategory.halal,
@@ -122,6 +126,15 @@ class _MapScreenState extends State<MapScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         title: const Text('Carte'),
+        actions: [
+          IconButton(
+            icon: Icon(_panelOpen ? Icons.expand_less : Icons.tune),
+            tooltip: _panelOpen
+                ? 'Masquer la recherche et les filtres'
+                : 'Afficher la recherche et les filtres',
+            onPressed: () => setState(() => _panelOpen = !_panelOpen),
+          ),
+        ],
       ),
       body: lat == null || lon == null
           ? const Center(
@@ -143,71 +156,87 @@ class _MapScreenState extends State<MapScreen> {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-          child: TextField(
-            controller: _citySearchController,
-            onChanged: _onCityQueryChanged,
-            decoration: const InputDecoration(
-              prefixIcon: Icon(Icons.search),
-              hintText: 'Rechercher une ville…',
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
-          ),
-        ),
-        if (_cityResults.isNotEmpty)
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 180),
-            child: Card(
-              margin: const EdgeInsets.fromLTRB(12, 4, 12, 0),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: _cityResults.length,
-                itemBuilder: (context, index) {
-                  final result = _cityResults[index];
-                  return ListTile(
-                    dense: true,
-                    leading: const Icon(Icons.location_city),
-                    title: Text(result.displayLabel),
-                    onTap: () => _selectCity(result),
-                  );
-                },
-              ),
-            ),
-          ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-          child: TextField(
-            onChanged: (value) => setState(() => _poiFilterQuery = value),
-            decoration: const InputDecoration(
-              prefixIcon: Icon(Icons.filter_alt_outlined),
-              hintText: 'Filtrer les lieux affichés par nom…',
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Wrap(
-            spacing: 8,
-            children: [
-              for (final category in PoiCategory.values)
-                FilterChip(
-                  label: Text(category.labelFr),
-                  avatar: Icon(_iconFor(category), size: 18, color: _colorFor(category)),
-                  selected: _visibleCategories.contains(category),
-                  onSelected: (selected) => setState(() {
-                    if (selected) {
-                      _visibleCategories.add(category);
-                    } else {
-                      _visibleCategories.remove(category);
-                    }
-                  }),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          alignment: Alignment.topCenter,
+          child: !_panelOpen
+              ? const SizedBox(width: double.infinity)
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                      child: TextField(
+                        controller: _citySearchController,
+                        onChanged: _onCityQueryChanged,
+                        decoration: const InputDecoration(
+                          prefixIcon: Icon(Icons.search),
+                          hintText: 'Rechercher une ville…',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                        ),
+                      ),
+                    ),
+                    if (_cityResults.isNotEmpty)
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 180),
+                        child: Card(
+                          margin: const EdgeInsets.fromLTRB(12, 4, 12, 0),
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: _cityResults.length,
+                            itemBuilder: (context, index) {
+                              final result = _cityResults[index];
+                              return ListTile(
+                                dense: true,
+                                leading: const Icon(Icons.location_city),
+                                title: Text(result.displayLabel),
+                                onTap: () => _selectCity(result),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                      child: TextField(
+                        onChanged: (value) => setState(() => _poiFilterQuery = value),
+                        decoration: const InputDecoration(
+                          prefixIcon: Icon(Icons.filter_alt_outlined),
+                          hintText: 'Filtrer les lieux affichés par nom…',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      child: Wrap(
+                        spacing: 8,
+                        children: [
+                          for (final category in PoiCategory.values)
+                            FilterChip(
+                              label: Text(category.labelFr),
+                              avatar: Icon(
+                                _iconFor(category),
+                                size: 18,
+                                color: _colorFor(category),
+                              ),
+                              selected: _visibleCategories.contains(category),
+                              onSelected: (selected) => setState(() {
+                                if (selected) {
+                                  _visibleCategories.add(category);
+                                } else {
+                                  _visibleCategories.remove(category);
+                                }
+                              }),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-            ],
-          ),
         ),
         Expanded(
           child: FutureBuilder<List<PointOfInterest>>(
