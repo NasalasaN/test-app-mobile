@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/app_exception.dart';
 import '../models/surah_model.dart';
 import '../services/api/quran_api.dart';
 import '../services/storage/storage_service.dart';
 import '../theme/app_colors.dart';
+import '../widgets/error_retry_view.dart';
 import 'quran_surah_detail_screen.dart';
 
 /// Liste des 114 sourates du Coran, dans leur ordre canonique, avec
@@ -68,26 +70,14 @@ class _QuranSurahListScreenState extends State<QuranSurahListScreen> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError) {
-                  final message = snapshot.error is QuranApiException
-                      ? (snapshot.error as QuranApiException).messageFr
-                      : 'Erreur inattendue lors du chargement du Coran.';
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(message, textAlign: TextAlign.center),
-                          const SizedBox(height: 16),
-                          OutlinedButton(
-                            onPressed: () => setState(() {
-                              _future = _api.fetchSurahList();
-                            }),
-                            child: const Text('Réessayer'),
-                          ),
-                        ],
-                      ),
+                  return ErrorRetryView(
+                    message: friendlyErrorMessage(
+                      snapshot.error!,
+                      fallback: 'Erreur inattendue lors du chargement du Coran.',
                     ),
+                    onRetry: () => setState(() {
+                      _future = _api.fetchSurahList();
+                    }),
                   );
                 }
 

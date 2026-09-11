@@ -2,13 +2,15 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../models/app_exception.dart';
 import '../../models/weather_model.dart';
 
 /// Erreur levée par [WeatherApi.fetchCurrentWeather] avec un message prêt à
 /// afficher à l'utilisateur.
-class WeatherApiException implements Exception {
+class WeatherApiException implements AppException {
   const WeatherApiException(this.messageFr);
 
+  @override
   final String messageFr;
 
   @override

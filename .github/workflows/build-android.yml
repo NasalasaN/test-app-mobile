@@ -34,9 +34,13 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
-      - run: flutter build apk --release
+      # --split-per-abi génère un APK distinct par architecture processeur
+      # au lieu d'un unique fichier "universel" contenant les trois : chacun
+      # est beaucoup plus léger à télécharger/installer. arm64-v8a couvre la
+      # quasi-totalité des téléphones Android récents (2018+).
+      - run: flutter build apk --release --split-per-abi
 
       - uses: actions/upload-artifact@v4
         with:
           name: miqat-app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk

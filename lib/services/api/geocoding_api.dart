@@ -2,14 +2,16 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../models/app_exception.dart';
 import '../../models/city_search_result_model.dart';
 import '../../models/location_model.dart';
 
 /// Erreur levée par [GeocodingApi.searchCities] avec un message prêt à
 /// afficher à l'utilisateur.
-class GeocodingApiException implements Exception {
+class GeocodingApiException implements AppException {
   const GeocodingApiException(this.messageFr);
 
+  @override
   final String messageFr;
 
   @override

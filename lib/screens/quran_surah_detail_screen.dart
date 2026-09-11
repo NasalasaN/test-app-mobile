@@ -3,10 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../models/app_exception.dart';
 import '../models/surah_model.dart';
 import '../services/api/quran_api.dart';
 import '../services/storage/storage_service.dart';
 import '../theme/app_colors.dart';
+import '../widgets/error_retry_view.dart';
 
 /// Affiche l'intégralité d'une sourate : chaque verset en arabe, en
 /// translittération phonétique, puis en français.
@@ -45,26 +47,14 @@ class _QuranSurahDetailScreenState extends State<QuranSurahDetailScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            final message = snapshot.error is QuranApiException
-                ? (snapshot.error as QuranApiException).messageFr
-                : 'Erreur inattendue lors du chargement de la sourate.';
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(message, textAlign: TextAlign.center),
-                    const SizedBox(height: 16),
-                    OutlinedButton(
-                      onPressed: () => setState(() {
-                        _future = _api.fetchSurahDetail(widget.surahMeta.number);
-                      }),
-                      child: const Text('Réessayer'),
-                    ),
-                  ],
-                ),
+            return ErrorRetryView(
+              message: friendlyErrorMessage(
+                snapshot.error!,
+                fallback: 'Erreur inattendue lors du chargement de la sourate.',
               ),
+              onRetry: () => setState(() {
+                _future = _api.fetchSurahDetail(widget.surahMeta.number);
+              }),
             );
           }
 

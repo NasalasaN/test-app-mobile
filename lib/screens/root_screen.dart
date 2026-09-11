@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/ambiance_model.dart';
 import '../providers/settings_provider.dart';
 import '../theme/app_colors.dart';
 import '../widgets/animated_background.dart';
@@ -30,7 +31,8 @@ class _RootScreenState extends State<RootScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ambiance = context.watch<SettingsProvider>().ambiance;
+    final ambiance =
+        context.select<SettingsProvider, BackgroundAmbiance>((s) => s.ambiance);
 
     return Scaffold(
       backgroundColor: AppColors.nightBlue,

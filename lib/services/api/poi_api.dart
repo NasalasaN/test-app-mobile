@@ -2,12 +2,14 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../models/app_exception.dart';
 import '../../models/point_of_interest_model.dart';
 
 /// Erreur levée par [PoiApi] avec un message prêt à afficher à l'utilisateur.
-class PoiApiException implements Exception {
+class PoiApiException implements AppException {
   const PoiApiException(this.messageFr);
 
+  @override
   final String messageFr;
 
   @override

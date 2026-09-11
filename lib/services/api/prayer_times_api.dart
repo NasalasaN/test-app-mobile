@@ -2,13 +2,15 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../models/app_exception.dart';
 import '../../models/prayer_times_model.dart';
 
 /// Erreur levée par [PrayerTimesApi.fetchTimings] avec un message prêt à
 /// afficher à l'utilisateur.
-class PrayerTimesApiException implements Exception {
+class PrayerTimesApiException implements AppException {
   const PrayerTimesApiException(this.messageFr);
 
+  @override
   final String messageFr;
 
   @override

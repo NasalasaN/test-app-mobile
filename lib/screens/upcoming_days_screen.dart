@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/app_exception.dart';
 import '../models/prayer_times_model.dart';
 import '../providers/location_provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/api/prayer_times_api.dart';
 import '../theme/app_colors.dart';
 import '../utils/date_format_fr.dart';
+import '../widgets/error_retry_view.dart';
 
 const _daysAhead = 7;
 
@@ -63,26 +65,14 @@ class _UpcomingDaysScreenState extends State<UpcomingDaysScreen> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError) {
-                  final message = snapshot.error is PrayerTimesApiException
-                      ? (snapshot.error as PrayerTimesApiException).messageFr
-                      : 'Erreur inattendue lors du chargement des horaires.';
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(message, textAlign: TextAlign.center),
-                          const SizedBox(height: 16),
-                          OutlinedButton(
-                            onPressed: () => setState(() {
-                              _future = _fetchUpcomingDays();
-                            }),
-                            child: const Text('Réessayer'),
-                          ),
-                        ],
-                      ),
+                  return ErrorRetryView(
+                    message: friendlyErrorMessage(
+                      snapshot.error!,
+                      fallback: 'Erreur inattendue lors du chargement des horaires.',
                     ),
+                    onRetry: () => setState(() {
+                      _future = _fetchUpcomingDays();
+                    }),
                   );
                 }
 

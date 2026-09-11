@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
+import '../models/app_exception.dart';
 import '../models/city_search_result_model.dart';
 import '../models/point_of_interest_model.dart';
 import '../providers/location_provider.dart';
@@ -297,11 +298,7 @@ class _MapScreenState extends State<MapScreen> {
                           child: Row(
                             children: [
                               Expanded(
-                                child: Text(
-                                  snapshot.error is PoiApiException
-                                      ? (snapshot.error as PoiApiException).messageFr
-                                      : 'Erreur inattendue.',
-                                ),
+                                child: Text(friendlyErrorMessage(snapshot.error!)),
                               ),
                               TextButton(
                                 onPressed: () => setState(() {

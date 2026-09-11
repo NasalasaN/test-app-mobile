@@ -3,13 +3,15 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../models/app_exception.dart';
 import '../../models/surah_model.dart';
 import '../storage/storage_service.dart';
 
 /// Erreur levée par [QuranApi] avec un message prêt à afficher à l'utilisateur.
-class QuranApiException implements Exception {
+class QuranApiException implements AppException {
   const QuranApiException(this.messageFr);
 
+  @override
   final String messageFr;
 
   @override
